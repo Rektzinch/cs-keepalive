@@ -1,0 +1,25 @@
+name: keepalive
+on:
+  schedule:
+    - cron: "*/20 * * * *"
+  workflow_dispatch: null
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Touch CS1 + Worker A (Rektzinch)
+        env:
+          GH_TOKEN: ${{ secrets.TOK_MAIN }}
+        run: |
+          for cs in jubilant-happiness-wrr7xr9vp79pcpqg worker-a-v66vw6gp9grw3xqwg; do
+            gh codespace ssh -c "$cs" -- true && echo "$cs touched" || {
+              gh codespace start -c "$cs" 2>/dev/null || true
+              echo "$cs restarted-or-offline"
+            }
+          done
+      - name: Touch Worker B (Rektz-Inch)
+        env:
+          GH_TOKEN: ${{ secrets.TOK_B }}
+        run: |
+          gh codespace ssh -c friendly-funicular-695qwqwprrgh5pqj -- true \
+            && echo touched || echo offline
