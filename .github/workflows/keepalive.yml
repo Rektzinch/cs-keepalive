@@ -7,19 +7,18 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Touch CS1 + Worker A (Rektzinch)
+      - name: Ensure services + touch nodes
         env:
           GH_TOKEN: ${{ secrets.TOK_MAIN }}
         run: |
           for cs in jubilant-happiness-wrr7xr9vp79pcpqg worker-a-v66vw6gp9grw3xqwg; do
-            gh codespace ssh -c "$cs" -- true && echo "$cs touched" || {
-              gh codespace start -c "$cs" 2>/dev/null || true
-              echo "$cs restarted-or-offline"
-            }
+            gh codespace ssh -c "$cs" -- true >/dev/null 2>&1 \
+              || gh codespace start -c "$cs" || true
           done
+          gh codespace ssh -c jubilant-happiness-wrr7xr9vp79pcpqg -- 'export PATH="$HOME/.local/bin:$PATH"; pgrep -f "hermes gatewa[y]" >/dev/null || nohup hermes gateway run >> ~/.hermes/logs/gateway.log 2>&1 < /dev/null & disown; pgrep -f "watchdo[g].sh" >/dev/null || setsid nohup ~/watchdog.sh >/dev/null 2>&1 < /dev/null & ps -p $(cat ~/cluster/dispatcher.pid 2>/dev/null) -o pid= >/dev/null 2>&1 || { nohup bash ~/cluster/dispatcher.sh >> ~/cluster/logs/dispatcher.log 2>&1 < /dev/null & disown; }; pgrep -f "botct[l].sh" >/dev/null || /tmp/starter.sh' || true
       - name: Touch Worker B (Rektz-Inch)
         env:
           GH_TOKEN: ${{ secrets.TOK_B }}
         run: |
-          gh codespace ssh -c friendly-funicular-695qwqwprrgh5pqj -- true \
+          gh codespace ssh -c friendly-funicular-695qwqwprrgh5pqj -- true >/dev/null 2>&1 \
             && echo touched || echo offline
